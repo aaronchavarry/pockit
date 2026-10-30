@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-30 — Hosting
+
+- Repo on GitHub (`aaronchavarry/pockit`, branch `main`) and Vercel project `pockit` linked to it: every push to `main` deploys to production at https://pockit-five.vercel.app. Still the local-only demo: no env vars, no backend, data stays in the browser.
+
 ## 0.1.1 — 2026-10-30 — UI restyle from `ui-reference.jpg`
 
 Visual only. Flows, data and copy are unchanged.
