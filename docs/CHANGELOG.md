@@ -3,7 +3,8 @@
 ## 2026-10-30 — Hosting
 
 - Repo on GitHub (`aaronchavarry/pockit`, branch `main`) and Vercel project `pockit` linked to it: every push to `main` deploys to production at https://pockit-five.vercel.app. Still the local-only demo: no env vars, no backend, data stays in the browser.
-- Supabase project `pockit` (eu-north-1) created with the initial schema and RLS (`supabase/migrations/`). Not wired into the app yet.
+- Supabase project `pockit` (eu-north-1) created with the initial schema and RLS (`supabase/migrations/`).
+- Google sign-in (Supabase Auth, PKCE) with `/auth/callback`; signed-in accounts store their data in Supabase via `createSupabaseStore` and the atomic `apply_changes` RPC. Primary keys changed to `(user_id, id)`. Invite-only sign-up trigger with an allow-list (owner only). "Account" pill + Sign out. Demo unchanged and local. Vercel env vars for the public Supabase URL/key; functions region moved to `arn1` (Stockholm). `.env.example` added. Tests: mapper round-trip; e2e entry test accepts a real Google button.
 
 ## 0.1.1 — 2026-10-30 — UI restyle from `ui-reference.jpg`
 

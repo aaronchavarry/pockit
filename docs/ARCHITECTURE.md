@@ -70,8 +70,17 @@ DataProvider.mutate(fn) ──▶ Store (IndexedDB) ──reload──▶ AppDat
 | `ExpenseUnderstandingService` | deterministic local parser | server-side OpenAI adapter with schema-validated output, keeping the local fallback |
 | `ExpenseCategorizationService` | keyword/name/description matcher | AI categorizer; must still return `null` when unsure |
 | `CurrencyRateService` | static demo dataset | free rate API with caching and historical rates |
-| `Store` / `Repository<T>` | IndexedDB (`pockit-demo` DB) | Supabase adapter with RLS, per-user namespace |
+| `Store` / `Repository<T>` | IndexedDB (`pockit-demo` DB) for the demo; `createSupabaseStore` (`src/data/supabase-store.ts`) for signed-in accounts | offline cache + sync queue for accounts |
 | `EmailTransactionSource` | — (not created) | Gmail import job on a secure backend; dedupe via `sourceReference` |
+
+## Accounts (Supabase)
+
+- `src/data/supabase-client.ts`: one browser client (PKCE, session in localStorage key `pockit-auth`). `isCloudConfigured()` is false when `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are missing, and the app is then demo-only.
+- `src/services/auth/account-service.ts`: app mode (`pockit-mode` in localStorage: `demo` | `cloud`), Google sign-in, `/auth/callback` code exchange (with friendly errors, e.g. invite-only), sign-out.
+- `AppShell` boots the session first: cloud mode with a session → `DataProvider` gets `createSupabaseStore(client, userId)` and `seedAccount` (categories + preferences only); cloud mode without a session → back to `/`; otherwise the IndexedDB demo with `seedDemo`.
+- `createSupabaseStore`: reads page through tables 1000 rows at a time; every write (put, putMany, delete, `transaction`) is one call to the `apply_changes` RPC, so multi-record changes stay atomic as in IndexedDB. Row mapping lives in `supabase-mappers.ts` (tested round-trip).
+- Only public values reach the browser (URL + publishable key). Access control is RLS. No service-role key exists in the app or in Vercel.
+- The service worker never caches cross-origin requests, so Supabase API responses are never cached.
 
 ## Key decisions
 

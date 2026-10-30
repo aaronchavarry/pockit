@@ -38,6 +38,12 @@ export async function seedDemo(store: Store, timezone: string): Promise<void> {
   await store.preferences.set(seedPreferences(timezone));
 }
 
+/** First sign-in to an account: built-in categories and preferences only, no sample data. */
+export async function seedAccount(store: Store, timezone: string): Promise<void> {
+  await store.categories.putMany(seedCategories());
+  await store.preferences.set(seedPreferences(timezone));
+}
+
 async function loadAll(store: Store): Promise<AppData | null> {
   const [expenses, budgets, categories, preferences] = await Promise.all([
     store.expenses.list(),
@@ -62,13 +68,21 @@ async function openStore(): Promise<Store> {
   }
 }
 
-export function DataProvider({ children, storeFactory = openStore }: { children: ReactNode; storeFactory?: () => Promise<Store> }) {
+interface DataProviderProps {
+  children: ReactNode;
+  storeFactory?: () => Promise<Store>;
+  /** Fills an empty store (no preferences yet). Defaults to the demo seed. */
+  initialize?: (store: Store, timezone: string) => Promise<void>;
+}
+
+export function DataProvider({ children, storeFactory = openStore, initialize = seedDemo }: DataProviderProps) {
   const [store, setStore] = useState<Store | null>(null);
   const [data, setData] = useState<AppData | null>(null);
   const [status, setStatus] = useState<DataContextValue["status"]>("loading");
   const [error, setError] = useState<string | null>(null);
   const [today, setToday] = useState<PlainDate>(() => todayIn());
   const factoryRef = useRef(storeFactory);
+  const initializeRef = useRef(initialize);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,7 +91,7 @@ export function DataProvider({ children, storeFactory = openStore }: { children:
         const s = await factoryRef.current();
         let loaded = await loadAll(s);
         if (!loaded) {
-          await seedDemo(s, deviceTimeZone());
+          await initializeRef.current(s, deviceTimeZone());
           loaded = await loadAll(s);
         }
         if (cancelled) return;

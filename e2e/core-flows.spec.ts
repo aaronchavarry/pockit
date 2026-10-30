@@ -29,11 +29,13 @@ async function openAdd(page: Page) {
   await expect(page.getByRole("dialog", { name: "Add expense" })).toBeVisible();
 }
 
-test("entry screen: demo works, Google is visibly unavailable", async ({ page }) => {
+test("entry screen: demo works, Google is real or visibly unavailable", async ({ page }) => {
   await page.goto("/");
   const google = page.getByRole("button", { name: /Continue with Google/ });
-  await expect(google).toBeDisabled();
-  await expect(google).toContainText("Coming soon");
+  // Builds without Supabase config show "Coming soon"; configured builds offer real sign-in.
+  // Either way it must never fake a signed-in state on this screen.
+  if (await google.isDisabled()) await expect(google).toContainText("Coming soon");
+  else await expect(page.getByRole("button", { name: /Open my Pockit/ })).toHaveCount(0);
   await expect(page.getByText(/sample data/)).toBeVisible();
   await enterDemo(page);
   await expect(page.getByRole("heading", { name: "Recent" })).toBeVisible();

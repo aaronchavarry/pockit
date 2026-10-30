@@ -4,7 +4,7 @@
 
 ## 0. Working on this repo (read first)
 
-**Status (2026-10-30):** V1 local demo implemented. All phases are done. Home layout follows `home-reference.png`; visual style (colors, borders, spacing, navbar) follows `ui-reference.jpg`. Hosted on Vercel (https://pockit-five.vercel.app) from GitHub `aaronchavarry/pockit` `main`; pushes to `main` deploy to production. Read `docs/PROJECT.md` (rules and deviations), `docs/ARCHITECTURE.md` (folders, data flow, services), `docs/DATABASE.md` (schema) and `docs/CHANGELOG.md` before changing anything.
+**Status (2026-10-30):** V1 local demo implemented. All phases are done. Home layout follows `home-reference.png`; visual style (colors, borders, spacing, navbar) follows `ui-reference.jpg`. Release 1 in progress: Google sign-in + Supabase account data are live (invite-only, see `docs/DATABASE.md`); the demo stays local. Hosted on Vercel (https://pockit-five.vercel.app) from GitHub `aaronchavarry/pockit` `main`; pushes to `main` deploy to production. Read `docs/PROJECT.md` (rules and deviations), `docs/ARCHITECTURE.md` (folders, data flow, services), `docs/DATABASE.md` (schema) and `docs/CHANGELOG.md` before changing anything.
 
 Commands:
 
@@ -22,7 +22,7 @@ npm run check        # typecheck + lint + test + build
 Conventions:
 - Business rules live in `src/domain` and `src/application`. Components call use cases through `useData().mutate(...)` and never touch storage.
 - Money = integer minor units. Convert only through `CurrencyRateService`. Dates = `YYYY-MM-DD` via `src/lib/dates.ts`.
-- External providers go behind the interfaces in `src/services` and `src/data/repositories.ts`. No network calls in V1.
+- External providers go behind the interfaces in `src/services` and `src/data/repositories.ts`. The demo makes no network calls; account mode talks only to Supabase (public URL + publishable key from `.env.local` / Vercel env; never a service-role key in the app).
 - Update the docs and changelog in the same change as the code.
 
 ## 1. Product overview

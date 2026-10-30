@@ -4,7 +4,7 @@ Pockit is a lightweight personal expense manager. **V1 is a fully local demo**: 
 
 ## Release scope (V1, implemented)
 
-- **Entry screen** (`/`): "Try demo" (works) and "Continue with Google" (disabled, marked "Coming soon", does nothing).
+- **Entry screen** (`/`): "Continue with Google" (real sign-in when the build has Supabase config; otherwise disabled with "Coming soon") and "Try demo". A returning signed-in user sees "Open my Pockit".
 - **Home** (`/home`): follows `home-reference.png`. It shows the week/month toggle, a large "spent / budget" figure, a flat progress bar, % used, amount left or over, category bars (amount on top, icon below), and recent expenses.
 - **Expenses** (`/expenses`): list grouped by day, newest first. Search plus filters for category, currency, date range and amount range. Add, edit and delete (with confirmation).
 - **Add expense sheet** (any screen): "Describe it" (natural language) or "Fill a form".
@@ -13,11 +13,15 @@ Pockit is a lightweight personal expense manager. **V1 is a fully local demo**: 
 - **Demo mode**: sample data seeded relative to today. "Reset demo data" restores it. "Back to welcome screen" is also there.
 - **PWA**: manifest, generated icons and a service worker. All screens work offline after the first load.
 
-Not in V1 (by design): Google sign-in, Supabase, Gmail import, OpenAI, live exchange rates. See "Future" in `CLAUDE.md`.
+- **Account mode** (release 1, private beta): Google sign-in through Supabase Auth. The signed-in user's data lives in Supabase (RLS per user); first sign-in creates the built-in categories and preferences, no sample data. The "Account" pill opens "Your account" with Sign out. Invite-only: only allow-listed emails can create an account (now just the owner's Gmail), enforced by a database trigger, plus Google "Testing" mode with the same test user.
+- The demo stays local and separate; nothing from the demo is uploaded.
+
+Still not built: Gmail import, OpenAI, live exchange rates. See "Future" in `CLAUDE.md`.
 
 ## User flows
 
 1. Welcome → Try demo → Home with sample data.
+1b. Welcome → Continue with Google → Google → `/auth/callback` → Home with the account's own data. Not on the allow-list → "Pockit is invite-only right now".
 2. Tap **+** → type "Yesterday I spent €24.50 at Rimi buying groceries" → expense created and shown → optionally "Edit details".
 3. Home → tap a category bar → Expenses filtered to that category.
 4. Home with no matching budget → "Set one up" → Budgets with the create form pre-filled for that cadence.
@@ -66,7 +70,8 @@ Not in V1 (by design): Google sign-in, Supabase, Gmail import, OpenAI, live exch
 
 ## Known limitations
 
-- Single device only. Clearing site data erases the demo.
+- Demo: single device only. Clearing site data erases the demo.
+- Account mode needs a connection: data is read from and written to Supabase directly (no offline cache or sync queue yet). Offline, the account screen shows "couldn't reach your account". The demo still works offline.
 - Display currency is fixed to EUR (preferences exist, but there is no settings UI yet).
 - Recurring expenses are not auto-generated.
 - Category bars scroll sideways on narrow screens when there are many categories.

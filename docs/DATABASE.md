@@ -69,10 +69,14 @@
 - Budget.categoryId → Category.id (category budgets end when the category is deleted).
 - Budget.supersedesBudgetId → Budget.id (version chain).
 
-## Supabase (schema created, app not connected yet)
+## Supabase (account mode)
 
 - Project `pockit`, ref `yhjdsjlysdoqosbhjyfw`, region `eu-north-1` (Stockholm), org "aaronou's".
-- Schema: `supabase/migrations/20261030201800_initial_schema.sql` (applied). The app still uses only IndexedDB; no Supabase client or keys in the code yet.
+- Migrations (all applied): `20261030201800_initial_schema.sql`, `20261030220000_restrict_signups.sql`, `20261030223000_per_user_keys_and_apply_changes.sql`.
+- Used by signed-in accounts through `src/data/supabase-store.ts`. The demo keeps using IndexedDB.
+- Primary keys are `(user_id, id)`: client ids are unique per user only (built-in categories reuse `cat-groceries` etc. in every account).
+- `public.apply_changes(changes jsonb)`: batch of `{collection, op: "put", row}` / `{collection, op: "delete", id}` applied in one transaction, `security invoker` (RLS applies) and `user_id` forced to `auth.uid()`. Executable by `authenticated` only.
+- Invite-only sign-up: `private.allowed_emails` (schema not exposed to the API) + trigger `enforce_allowed_email` on `auth.users` (insert or email change). Add someone with `insert into private.allowed_emails values ('their@email')`. Currently: the owner's Gmail.
 - Tables `categories`, `expenses`, `budgets`, `preferences`: same fields as the local entities in snake_case, plus `user_id uuid` (defaults to `auth.uid()`, cascades on account delete). `amount_minor bigint`, `currency char(3)` (`^[A-Z]{3}$`), dates as `date`, `occurred_time time`, timestamps `timestamptz` with an `updated_at` trigger.
 - IDs are client-generated `text` (`exp_<uuid>`, …) so records created offline keep their id when synced.
 - Integrity: case-insensitive unique category name per user; `expenses (user_id, category_id)` → `categories (user_id, id)` with `on delete set null (category_id)` (expense kept, becomes Uncategorized, and can never point at another user's category); budget checks for scope/category, fixed_range ⇔ end_date, custom_recurring ⇔ anchor_day. Budget `category_id` and `supersedes_budget_id` stay soft references (closed budgets keep pointing at deleted categories). Budget status is still derived, not stored.

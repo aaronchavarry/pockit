@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { ExpenseEditorProvider, useExpenseEditor } from "@/components/expenses/expense-editor";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { HomeIcon, PieIcon, PlusIcon, ReceiptIcon, TagIcon } from "@/components/ui/icons";
 import { Spinner } from "@/components/ui/misc";
 import { ToastProvider, useToast } from "@/components/ui/toast";
-import { DataProvider, useData } from "@/state/data-provider";
+import { getSupabase } from "@/data/supabase-client";
+import { createSupabaseStore } from "@/data/supabase-store";
+import { currentAccount, getAppMode, setAppMode, signOut, type Account } from "@/services/auth/account-service";
+import { DataProvider, seedAccount, useData } from "@/state/data-provider";
 import { Logo, LogoMark } from "./logo";
 
 const NAV = [
@@ -19,15 +22,49 @@ const NAV = [
   { href: "/categories", label: "Categories", Icon: TagIcon },
 ] as const;
 
+/** What the shell is showing: the local sample demo, or a signed-in account. */
+type Session = { mode: "demo" } | { mode: "cloud"; account: Account };
+
+const SessionContext = createContext<Session>({ mode: "demo" });
+
 export function AppShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const account = getAppMode() === "cloud" ? await currentAccount() : null;
+      if (cancelled) return;
+      if (getAppMode() === "cloud" && !account) {
+        // Signed out or session gone: back to the entry screen.
+        setAppMode("demo");
+        router.replace("/");
+        return;
+      }
+      setSession(account ? { mode: "cloud", account } : { mode: "demo" });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (!session) return <Spinner label="Opening Pockit" />;
+
+  const db = getSupabase();
+  const account = session.mode === "cloud" ? session.account : null;
+  const cloud = account && db ? { storeFactory: async () => createSupabaseStore(db, account.userId), initialize: seedAccount } : {};
+
   return (
-    <DataProvider>
-      <ToastProvider>
-        <ExpenseEditorProvider>
-          <ShellFrame>{children}</ShellFrame>
-        </ExpenseEditorProvider>
-      </ToastProvider>
-    </DataProvider>
+    <SessionContext.Provider value={session}>
+      <DataProvider key={session.mode} {...cloud}>
+        <ToastProvider>
+          <ExpenseEditorProvider>
+            <ShellFrame>{children}</ShellFrame>
+          </ExpenseEditorProvider>
+        </ToastProvider>
+      </DataProvider>
+    </SessionContext.Provider>
   );
 }
 
@@ -37,6 +74,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
   const navIndex = NAV.findIndex((n) => n.href === pathname);
   const activeCol = navIndex < 0 ? -1 : navIndex < 2 ? navIndex : navIndex + 1;
   const { status, error, persistent } = useData();
+  const session = useContext(SessionContext);
   const [demoOpen, setDemoOpen] = useState(false);
 
   return (
@@ -72,7 +110,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="mt-auto">
-          <DemoPill onClick={() => setDemoOpen(true)} />
+          <SessionPill session={session} onClick={() => setDemoOpen(true)} />
         </div>
       </aside>
 
@@ -82,7 +120,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
           <Link href="/home" aria-label="Pockit home">
             <LogoMark size={24} />
           </Link>
-          <DemoPill onClick={() => setDemoOpen(true)} />
+          <SessionPill session={session} onClick={() => setDemoOpen(true)} />
         </header>
 
         {!persistent && status === "ready" && (
@@ -92,10 +130,14 @@ function ShellFrame({ children }: { children: ReactNode }) {
         )}
 
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-5 pt-5 pb-36 sm:px-8 lg:px-12 lg:pt-10 lg:pb-16">
-          {status === "loading" && <Spinner label="Loading your demo" />}
+          {status === "loading" && <Spinner label={session.mode === "cloud" ? "Loading your expenses" : "Loading your demo"} />}
           {status === "error" && (
             <div role="alert" className="py-20 text-center">
-              <p className="font-medium">Pockit couldn’t open its local storage.</p>
+              <p className="font-medium">
+                {session.mode === "cloud"
+                  ? "Pockit couldn’t reach your account. Check your connection."
+                  : "Pockit couldn’t open its local storage."}
+              </p>
               <p className="mt-1 text-sm text-ink-3">{error}</p>
               <Button className="mt-5" onClick={() => window.location.reload()}>
                 Try again
@@ -136,7 +178,11 @@ function ShellFrame({ children }: { children: ReactNode }) {
         </ul>
       </nav>
 
-      <DemoDialog open={demoOpen} onClose={() => setDemoOpen(false)} />
+      {session.mode === "cloud" ? (
+        <AccountDialog account={session.account} open={demoOpen} onClose={() => setDemoOpen(false)} />
+      ) : (
+        <DemoDialog open={demoOpen} onClose={() => setDemoOpen(false)} />
+      )}
     </div>
   );
 }
@@ -173,16 +219,47 @@ function MobileAddButton({ disabled }: { disabled: boolean }) {
   );
 }
 
-function DemoPill({ onClick }: { onClick: () => void }) {
+function SessionPill({ session, onClick }: { session: Session; onClick: () => void }) {
+  const cloud = session.mode === "cloud";
   return (
     <button
       type="button"
       onClick={onClick}
+      title={cloud ? session.account.email : undefined}
       className="inline-flex h-8 items-center gap-2 rounded-[var(--radius-tile)] bg-muted px-2.5 text-xs font-medium text-ink-2 ring-1 ring-inset ring-line hover:bg-track"
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-orange" aria-hidden="true" />
-      Demo mode
+      <span className={`h-1.5 w-1.5 rounded-full ${cloud ? "bg-positive" : "bg-orange"}`} aria-hidden="true" />
+      {cloud ? "Account" : "Demo mode"}
     </button>
+  );
+}
+
+function AccountDialog({ account, open, onClose }: { account: Account; open: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Your account"
+      description={<>Signed in as {account.email}. Your expenses are saved to your Pockit account.</>}
+      size="sm"
+    >
+      <div className="flex flex-col gap-3 pt-2">
+        <Button
+          variant="secondary"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            await signOut();
+            onClose();
+            router.replace("/");
+          }}
+        >
+          Sign out
+        </Button>
+      </div>
+    </Dialog>
   );
 }
 

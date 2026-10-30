@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ui/button";
-import { GoogleMark } from "@/components/ui/icons";
+import { EntryActions } from "@/components/layout/entry-actions";
 import { Logo } from "@/components/layout/logo";
 
 export const metadata: Metadata = { title: "Welcome" };
@@ -34,23 +33,9 @@ export default function EntryPage() {
       </section>
 
       <div className="flex flex-col gap-3">
-        <ButtonLink href="/home" size="lg" className="w-full">
-          Try demo
-        </ButtonLink>
-        <button
-          type="button"
-          disabled
-          aria-describedby="google-soon"
-          className="inline-flex h-12 w-full cursor-not-allowed items-center justify-center gap-2.5 rounded-[0.875rem] bg-muted text-base font-medium text-ink-3"
-        >
-          <GoogleMark />
-          Continue with Google
-          <span id="google-soon" className="rounded-md bg-surface px-2 py-0.5 text-xs ring-1 ring-inset ring-line font-medium text-ink-3">
-            Coming soon
-          </span>
-        </button>
+        <EntryActions />
         <p className="mt-2 text-center text-sm leading-relaxed text-ink-3">
-          The demo uses sample data and runs entirely on this device. Nothing is sent anywhere.
+          The demo uses sample data and runs entirely on this device. Nothing from the demo is sent anywhere.
         </p>
       </div>
     </main>
