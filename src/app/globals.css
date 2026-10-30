@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Neutral, cool palette after ui-reference.jpg: white canvas, hairlines, black actions. */
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-muted: #f2f2f7;
+  --color-track: #e5e5ea;
+  --color-line: #ebebf0;
+  --color-line-strong: #d1d1d6;
+
+  --color-ink: #0a0a0c;
+  --color-ink-2: #3c3c43;
+  --color-ink-3: #6c6c70;
+  --color-ink-4: #8e8e93; /* large text / decoration only */
+
+  --color-teal: #0f766e;
+  --color-teal-strong: #0b5d57;
+  --color-teal-soft: #e3f6f1;
+  --color-orange: #ff7a1a;
+  --color-orange-ink: #b4520c;
+  --color-orange-soft: #fff1e3;
+  /* Semantic colors sampled from ui-reference.jpg (+income green, -expense red). */
+  --color-positive: #30c060;
+  --color-positive-ink: #1a7f40;
+  --color-positive-soft: #e8f8ee;
+  --color-negative: #d93036;
+  --color-danger: #c62a1e;
+  --color-danger-soft: #fdeceb;
+
+  --radius-card: 1.25rem;
+  --radius-field: 0.75rem;
+  --radius-tile: 0.75rem;
+
+  --animate-sheet-in: sheet-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-fade-in: fade-in 180ms ease-out;
+  --animate-page-in: page-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-tab-pop: tab-pop 360ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes page-in {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes tab-pop {
+  0% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-family: var(--font-sans);
+    min-height: 100dvh;
+    font-feature-settings: "ss01";
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  dialog::backdrop {
+    background: rgb(17 17 19 / 0.28);
+    animation: var(--animate-fade-in);
+  }
+  input[type="date"],
+  input[type="time"] {
+    min-height: 2.75rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
