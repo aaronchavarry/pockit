@@ -69,10 +69,15 @@
 - Budget.categoryId → Category.id (category budgets end when the category is deleted).
 - Budget.supersedesBudgetId → Budget.id (version chain).
 
-## Future Supabase mapping (not implemented)
+## Supabase (schema created, app not connected yet)
 
-- Tables `expenses`, `budgets`, `categories`, `preferences` with a `user_id uuid references auth.users` column and RLS `user_id = auth.uid()`.
-- `amount_minor bigint`, `currency char(3)`, dates as `date`, timestamps as `timestamptz`.
-- `email_imports` table (provider message id, status, skip reason) with a unique `(user_id, provider, message_id)`. Add `expenses.source_reference` unique per user for dedupe.
-- `exchange_rates (base, quote, rate numeric, rate_date, source)` with a unique `(base, quote, rate_date, source)`.
+- Project `pockit`, ref `yhjdsjlysdoqosbhjyfw`, region `eu-north-1` (Stockholm), org "aaronou's".
+- Schema: `supabase/migrations/20261030201800_initial_schema.sql` (applied). The app still uses only IndexedDB; no Supabase client or keys in the code yet.
+- Tables `categories`, `expenses`, `budgets`, `preferences`: same fields as the local entities in snake_case, plus `user_id uuid` (defaults to `auth.uid()`, cascades on account delete). `amount_minor bigint`, `currency char(3)` (`^[A-Z]{3}$`), dates as `date`, `occurred_time time`, timestamps `timestamptz` with an `updated_at` trigger.
+- IDs are client-generated `text` (`exp_<uuid>`, …) so records created offline keep their id when synced.
+- Integrity: case-insensitive unique category name per user; `expenses (user_id, category_id)` → `categories (user_id, id)` with `on delete set null (category_id)` (expense kept, becomes Uncategorized, and can never point at another user's category); budget checks for scope/category, fixed_range ⇔ end_date, custom_recurring ⇔ anchor_day. Budget `category_id` and `supersedes_budget_id` stay soft references (closed budgets keep pointing at deleted categories). Budget status is still derived, not stored.
+- `email_imports` (future Gmail): `(user_id, provider, message_id)` unique, status `imported|skipped|failed`, skip reason. `expenses (user_id, source_reference)` unique when set, for dedupe.
+- `exchange_rates`: shared, PK `(base, quote, rate_date, source)`.
+- RLS on every table. Users get full CRUD on their own rows in the four user tables; read-only on their `email_imports` and on `exchange_rates`. Writes to those two are reserved for the service role (backend).
+- Verified on 2026-10-30 with two throwaway users: user B could not read, update or delete user A's rows; deleting A's category kept A's expense with `category_id = null`. Test users removed. Security advisor: no findings.
 - The demo DB stays separate. Importing demo data into an account would be an explicit, optional action.

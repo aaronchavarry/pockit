@@ -3,6 +3,7 @@
 ## 2026-10-30 — Hosting
 
 - Repo on GitHub (`aaronchavarry/pockit`, branch `main`) and Vercel project `pockit` linked to it: every push to `main` deploys to production at https://pockit-five.vercel.app. Still the local-only demo: no env vars, no backend, data stays in the browser.
+- Supabase project `pockit` (eu-north-1) created with the initial schema and RLS (`supabase/migrations/`). Not wired into the app yet.
 
 ## 0.1.1 — 2026-10-30 — UI restyle from `ui-reference.jpg`
 
