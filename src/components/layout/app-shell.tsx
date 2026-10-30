@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { GmailSection } from "@/components/account/gmail-section";
 import { ExpenseEditorProvider, useExpenseEditor } from "@/components/expenses/expense-editor";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -12,6 +13,7 @@ import { ToastProvider, useToast } from "@/components/ui/toast";
 import { getSupabase } from "@/data/supabase-client";
 import { createSupabaseStore } from "@/data/supabase-store";
 import { currentAccount, getAppMode, setAppMode, signOut, type Account } from "@/services/auth/account-service";
+import { describeSync, syncGmailNow } from "@/services/email/gmail-service";
 import { DataProvider, seedAccount, useData } from "@/state/data-provider";
 import { Logo, LogoMark } from "./logo";
 
@@ -73,9 +75,27 @@ function ShellFrame({ children }: { children: ReactNode }) {
   // Grid column of the active tab in the mobile bar; column 2 is the add pill.
   const navIndex = NAV.findIndex((n) => n.href === pathname);
   const activeCol = navIndex < 0 ? -1 : navIndex < 2 ? navIndex : navIndex + 1;
-  const { status, error, persistent } = useData();
+  const { status, error, persistent, mutate } = useData();
   const session = useContext(SessionContext);
+  const toast = useToast();
   const [demoOpen, setDemoOpen] = useState(false);
+
+  // Back from Google's Gmail consent (gmail-oauth-callback redirects to /home?gmail=…).
+  useEffect(() => {
+    if (status !== "ready" || session.mode !== "cloud") return;
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("gmail");
+    if (!result) return;
+    window.history.replaceState(null, "", window.location.pathname);
+    if (result !== "connected") {
+      toast(params.get("reason") === "cancelled" ? "Gmail connection cancelled" : "Couldn’t connect Gmail. Please try again.");
+      return;
+    }
+    toast("Gmail connected. Checking your emails…");
+    mutate(() => syncGmailNow())
+      .then((summary) => toast(describeSync(summary)))
+      .catch((e: unknown) => toast(e instanceof Error ? e.message : "Gmail sync failed."));
+  }, [status, session.mode, mutate, toast]);
 
   return (
     <div className="min-h-dvh lg:flex">
@@ -243,9 +263,9 @@ function AccountDialog({ account, open, onClose }: { account: Account; open: boo
       onClose={onClose}
       title="Your account"
       description={<>Signed in as {account.email}. Your expenses are saved to your Pockit account.</>}
-      size="sm"
     >
       <div className="flex flex-col gap-3 pt-2">
+        <GmailSection />
         <Button
           variant="secondary"
           disabled={busy}

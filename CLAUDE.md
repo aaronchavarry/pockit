@@ -4,7 +4,7 @@
 
 ## 0. Working on this repo (read first)
 
-**Status (2026-10-30):** V1 local demo implemented. All phases are done. Home layout follows `home-reference.png`; visual style (colors, borders, spacing, navbar) follows `ui-reference.jpg`. Release 1 in progress: Google sign-in + Supabase account data are live (invite-only, see `docs/DATABASE.md`); the demo stays local. Hosted on Vercel (https://pockit-five.vercel.app) from GitHub `aaronchavarry/pockit` `main`; pushes to `main` deploy to production. Read `docs/PROJECT.md` (rules and deviations), `docs/ARCHITECTURE.md` (folders, data flow, services), `docs/DATABASE.md` (schema) and `docs/CHANGELOG.md` before changing anything.
+**Status (2026-10-30):** V1 local demo implemented. All phases are done. Home layout follows `home-reference.png`; visual style (colors, borders, spacing, navbar) follows `ui-reference.jpg`. Release 1 in progress: Google sign-in + Supabase account data are live (invite-only, see `docs/DATABASE.md`), and Gmail import of BCP card emails runs in Supabase Edge Functions (`supabase/functions/`); the demo stays local. Hosted on Vercel (https://pockit-five.vercel.app) from GitHub `aaronchavarry/pockit` `main`; pushes to `main` deploy to production. Read `docs/PROJECT.md` (rules and deviations), `docs/ARCHITECTURE.md` (folders, data flow, services), `docs/DATABASE.md` (schema) and `docs/CHANGELOG.md` before changing anything.
 
 Commands:
 

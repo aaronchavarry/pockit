@@ -16,7 +16,9 @@ Pockit is a lightweight personal expense manager. **V1 is a fully local demo**: 
 - **Account mode** (release 1, private beta): Google sign-in through Supabase Auth. The signed-in user's data lives in Supabase (RLS per user); first sign-in creates the built-in categories and preferences, no sample data. The "Account" pill opens "Your account" with Sign out. Invite-only: only allow-listed emails can create an account (now just the owner's Gmail), enforced by a database trigger, plus Google "Testing" mode with the same test user.
 - The demo stays local and separate; nothing from the demo is uploaded.
 
-Still not built: Gmail import, OpenAI, live exchange rates. See "Future" in `CLAUDE.md`.
+- **Gmail import** (account mode): "Your account" → "Connect Gmail" links any Gmail inbox (it can differ from the sign-in account) with read-only access. Every hour, and on "Sync now", BCP credit-card notifications (subject "BCP Notificaciones", body "Realizaste un consumo de …") become expenses automatically: amount + currency ($ → USD, S/ → PEN), merchant ("Empresa"), date and time (Lima), category only when a keyword matches exactly one category. Emails without amount or merchant are skipped with a reason; the last 5 are listed in the dialog. Duplicates are impossible (Gmail message id and BCP operation number). First connection imports the last 30 days.
+
+Still not built: other banks/email formats, OpenAI, live exchange rates. See "Future" in `CLAUDE.md`.
 
 ## User flows
 
@@ -71,6 +73,7 @@ Still not built: Gmail import, OpenAI, live exchange rates. See "Future" in `CLA
 ## Known limitations
 
 - Demo: single device only. Clearing site data erases the demo.
+- Gmail: Google app is in "Testing", so Google drops the Gmail grant after 7 days; the dialog then shows "Reconnect". Publishing needs a verified own domain. Only the BCP card-purchase format is understood (rule-based, no AI).
 - Account mode needs a connection: data is read from and written to Supabase directly (no offline cache or sync queue yet). Offline, the account screen shows "couldn't reach your account". The demo still works offline.
 - Display currency is fixed to EUR (preferences exist, but there is no settings UI yet).
 - Recurring expenses are not auto-generated.

@@ -10,5 +10,5 @@ export default defineConfig([
       "@typescript-eslint/no-explicit-any": "error",
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "public/sw.js"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "public/sw.js", "supabase/functions/**"]),
 ]);

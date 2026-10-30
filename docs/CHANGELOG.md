@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-31 — Gmail import (BCP)
+
+- Connect Gmail (read-only, any inbox) from "Your account"; hourly pg_cron sync plus "Sync now". BCP card notifications become expenses automatically; non-purchases are skipped with a reason; dedupe by Gmail message id and BCP operation number. Refresh token in Supabase Vault, never in the browser.
+- Edge Functions `gmail-connect`, `gmail-oauth-callback`, `gmail-sync`; migration `20261031000000_gmail_connections.sql`.
+- Tests: BCP parser (plain text, HTML, soles, thousands, AM/PM, fallbacks, skips) and import rules (categorization, Lima time).
+- Google app stays in "Testing" (publishing needs a verified domain): Gmail must be reconnected every 7 days.
+
 ## 2026-10-30 — Hosting
 
 - Repo on GitHub (`aaronchavarry/pockit`, branch `main`) and Vercel project `pockit` linked to it: every push to `main` deploys to production at https://pockit-five.vercel.app. Still the local-only demo: no env vars, no backend, data stays in the browser.
