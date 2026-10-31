@@ -41,6 +41,7 @@ export function ExpenseForm({ expense, onDone }: { expense?: Expense; onDone: ()
           occurredTime: expense.occurredTime ?? "",
           categoryId: expense.categoryId && categories.some((c) => c.id === expense.categoryId) ? expense.categoryId : "",
           recurrence: expense.recurrence,
+          countsTowardBudget: expense.countsTowardBudget !== false,
         }
       : {
           amount: "",
@@ -51,6 +52,7 @@ export function ExpenseForm({ expense, onDone }: { expense?: Expense; onDone: ()
           occurredTime: nowTime(preferences.timezone),
           categoryId: "",
           recurrence: "none",
+          countsTowardBudget: true,
         },
   );
   const [categoryTouched, setCategoryTouched] = useState(Boolean(expense));
@@ -60,7 +62,7 @@ export function ExpenseForm({ expense, onDone }: { expense?: Expense; onDone: ()
 
   const currencies = [...new Set([...SUPPORTED_CURRENCIES, values.currency])];
 
-  function set<K extends ExpenseField>(key: K, value: string) {
+  function set<K extends Exclude<ExpenseField, "countsTowardBudget">>(key: K, value: string) {
     setValues((v) => {
       const next = { ...v, [key]: value };
       // Suggest a category from description/merchant until the user picks one.
@@ -226,6 +228,21 @@ export function ExpenseForm({ expense, onDone }: { expense?: Expense; onDone: ()
           )}
         </Field>
       </div>
+
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-[var(--radius-field)] bg-muted px-3.5 py-2.5">
+        <span className="flex flex-col">
+          <span className="text-sm font-medium text-ink">Count toward budget</span>
+          <span className="text-xs text-ink-3">Turn off for one-offs like a flight.</span>
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          data-field="countsTowardBudget"
+          checked={values.countsTowardBudget}
+          onChange={(e) => setValues((v) => ({ ...v, countsTowardBudget: e.target.checked }))}
+          className="switch"
+        />
+      </label>
 
       {expense && (
         <p className="text-xs text-ink-3">

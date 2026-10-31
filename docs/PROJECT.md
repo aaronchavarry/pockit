@@ -35,6 +35,7 @@ Still not built: other banks/email formats, OpenAI, live exchange rates. See "Fu
 - Amount (required, > 0), currency (ISO 4217), description (required). Merchant, time and category are optional.
 - Date defaults to today. Time defaults to now in the form, and stays unset for text entry unless the text gives one.
 - Recurrence (`none|daily|weekly|monthly|yearly`) is a label only. V1 does **not** create future occurrences automatically.
+- Each expense has a **Count toward budget** switch (default on). Off = still listed and included in "spent" on Home, but excluded from every budget's progress; Home shows the excluded amount under the budget capsule.
 - Deleting an expense is a hard delete after confirmation, so it drops out of all totals at once.
 
 ### Natural-language entry (local parser)

@@ -6,7 +6,7 @@ import type { Collection, Repository, Store, StoreWrites } from "./repositories"
  * future real-user data never mixes with seeded demo data.
  */
 export const DB_NAME = "pockit-demo";
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 const COLLECTIONS: readonly Collection[] = ["expenses", "budgets", "categories"];
 const META = "meta";
@@ -35,6 +35,16 @@ export function openDatabase(factory: IDBFactory = indexedDB): Promise<IDBDataba
       if (event.oldVersion < 1) {
         for (const name of COLLECTIONS) db.createObjectStore(name, { keyPath: "id" });
         db.createObjectStore(META);
+      }
+      if (event.oldVersion >= 1 && event.oldVersion < 2) {
+        // v2: expenses gain countsTowardBudget (default true).
+        const store = req.transaction!.objectStore("expenses");
+        store.openCursor().onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
+          if (!cursor) return;
+          if (cursor.value.countsTowardBudget === undefined) cursor.update({ ...cursor.value, countsTowardBudget: true });
+          cursor.continue();
+        };
       }
     };
     req.onsuccess = () => resolve(req.result);

@@ -139,6 +139,7 @@ export function seedExpenses(today: PlainDate, timezone: string): Expense[] {
     recurrence: e.recurrence ?? "none",
     source: "manual",
     sourceReference: null,
+    countsTowardBudget: true,
     createdAt: SEED_TS,
     updatedAt: SEED_TS,
   }));

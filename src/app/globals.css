@@ -115,6 +115,34 @@
     -webkit-appearance: none;
     appearance: none;
   }
+  input[type="checkbox"].switch {
+    appearance: none;
+    flex-shrink: 0;
+    position: relative;
+    width: 2.75rem;
+    height: 1.625rem;
+    border-radius: 999px;
+    background: var(--color-line-strong);
+    cursor: pointer;
+    transition: background-color 0.15s;
+  }
+  input[type="checkbox"].switch::after {
+    content: "";
+    position: absolute;
+    top: 0.1875rem;
+    left: 0.1875rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: #fff;
+    transition: transform 0.15s;
+  }
+  input[type="checkbox"].switch:checked {
+    background: var(--color-ink);
+  }
+  input[type="checkbox"].switch:checked::after {
+    transform: translateX(1.125rem);
+  }
   input[type="date"]::-webkit-date-and-time-value,
   input[type="time"]::-webkit-date-and-time-value {
     text-align: left;

@@ -9,7 +9,7 @@ import { useFormat } from "@/state/use-format";
 /** Centered "spent" figure and one capsule with a ring meter, what's left and the share used. */
 export function SpendSummary({ dashboard }: { dashboard: Dashboard }) {
   const fmt = useFormat();
-  const { spent, budget, currency, period } = dashboard;
+  const { spent, outsideBudgetMinor, budget, currency, period } = dashboard;
   const symbol = currencySymbol(currency, fmt.locale);
   const cadence = period === "week" ? "weekly" : "monthly";
 
@@ -44,6 +44,10 @@ export function SpendSummary({ dashboard }: { dashboard: Dashboard }) {
             Set one up
           </Link>
         </p>
+      )}
+
+      {budget && outsideBudgetMinor > 0 && (
+        <p className="mt-3 text-xs text-ink-3">{fmt.money(outsideBudgetMinor, currency)} not counted in the budget</p>
       )}
 
       {spent.unconverted.length > 0 && (

@@ -15,6 +15,7 @@ export interface ExpenseRow {
   recurrence: Expense["recurrence"];
   source: Expense["source"];
   source_reference: string | null;
+  counts_toward_budget: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +68,7 @@ export const expenseToRow = (e: Expense): ExpenseRow => ({
   recurrence: e.recurrence,
   source: e.source,
   source_reference: e.sourceReference,
+  counts_toward_budget: e.countsTowardBudget,
   created_at: e.createdAt,
   updated_at: e.updatedAt,
 });
@@ -85,6 +87,7 @@ export const expenseFromRow = (r: ExpenseRow): Expense => ({
   recurrence: r.recurrence,
   source: r.source,
   sourceReference: r.source_reference,
+  countsTowardBudget: r.counts_toward_budget ?? true,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });

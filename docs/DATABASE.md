@@ -2,7 +2,7 @@
 
 ## Storage
 
-- IndexedDB database **`pockit-demo`**, schema version **1** (`src/data/indexeddb-store.ts`).
+- IndexedDB database **`pockit-demo`**, schema version **2** (v2 backfills `countsTowardBudget: true` on existing expenses) (`src/data/indexeddb-store.ts`).
 - The name is namespaced to the demo so future real-user data never mixes with demo data.
 - Object stores:
 
@@ -34,6 +34,7 @@
 | recurrence | `none\|daily\|weekly\|monthly\|yearly` | label only in V1 |
 | source | `manual\|natural_language\|email` | |
 | sourceReference | string \| null | future: email message / transaction id for dedupe |
+| countsTowardBudget | boolean | default true; false = listed and totalled on Home, but not counted against any budget (Supabase: `counts_toward_budget`, migration `20261031120000`) |
 | createdAt / updatedAt | ISO timestamp | |
 
 ### Budget

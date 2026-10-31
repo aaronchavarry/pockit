@@ -47,6 +47,7 @@ function expense(occurredOn: string, amountMinor: number, categoryId: string | n
     recurrence: "none",
     source: "manual",
     sourceReference: null,
+    countsTowardBudget: true,
     createdAt: "",
     updatedAt: "",
   };

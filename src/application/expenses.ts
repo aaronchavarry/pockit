@@ -18,6 +18,7 @@ export interface ExpenseFormInput {
   occurredTime: string;
   categoryId: string; // "" = Uncategorized
   recurrence: string;
+  countsTowardBudget: boolean;
 }
 
 export type ExpenseField = keyof ExpenseFormInput;
@@ -31,6 +32,7 @@ export interface ValidExpenseFields {
   occurredTime: string | null;
   categoryId: string | null;
   recurrence: Recurrence;
+  countsTowardBudget: boolean;
 }
 
 const MAX_TEXT = 120;
@@ -75,6 +77,7 @@ export function validateExpenseInput(
     occurredTime: time || null,
     categoryId,
     recurrence: input.recurrence as Recurrence,
+    countsTowardBudget: input.countsTowardBudget,
   });
 }
 
@@ -133,7 +136,7 @@ export async function quickAddExpense(
   );
   const expense = await createExpense(
     store,
-    { ...draft, categoryId: categorization.categoryId },
+    { ...draft, categoryId: categorization.categoryId, countsTowardBudget: true },
     { timezone: ctx.preferences.timezone, source: "natural_language" },
   );
   return { ok: true, expense, categorization, notes: understood.notes };

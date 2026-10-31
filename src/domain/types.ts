@@ -24,6 +24,8 @@ export interface Expense {
   source: ExpenseSource;
   /** Future: email message / transaction reference for dedupe. */
   sourceReference: string | null;
+  /** False = shown and totalled, but not counted against budgets (e.g. a flight). */
+  countsTowardBudget: boolean;
   createdAt: string; // ISO timestamp
   updatedAt: string;
 }

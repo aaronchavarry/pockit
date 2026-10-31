@@ -22,6 +22,7 @@ const form = (over: Partial<ExpenseFormInput> = {}): ExpenseFormInput => ({
   occurredTime: "",
   categoryId: "cat-dining",
   recurrence: "none",
+  countsTowardBudget: true,
   ...over,
 });
 
@@ -108,6 +109,17 @@ describe("expense lifecycle and dashboard", () => {
     expect(d.range).toEqual({ start: "2026-10-24", end: "2026-11-25" });
     expect(d.budget?.budget.id).toBe("bud-cycle");
     expect(buildDashboard({ period: "week", today: TODAY, expenses: [], budgets: [range], categories, currency: "EUR", fx }).budget).toBeNull();
+  });
+
+  it("expenses switched out of the budget still count as spent, not against the budget", async () => {
+    const v = validateExpenseInput(form({ amount: "300", countsTowardBudget: false }), categories);
+    if (!v.ok) throw new Error("invalid");
+    await createExpense(store, v.value, { timezone: "UTC" });
+    const d = await dashboard();
+    expect(d.spent.amountMinor).toBe(30000);
+    expect(d.outsideBudgetMinor).toBe(30000);
+    expect(d.budget?.spent.amountMinor).toBe(0);
+    expect(d.budget?.remainingMinor).toBe(160000);
   });
 
   it("shows no budget (instead of wrong values) when none applies", async () => {

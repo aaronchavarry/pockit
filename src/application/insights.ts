@@ -55,7 +55,10 @@ export function budgetProgress(
   const window = periodWindow(budget, ctx.date);
   const relevant = window
     ? expenses.filter(
-        (e) => inRange(e.occurredOn, window) && (budget.scope === "overall" || e.categoryId === budget.categoryId),
+        (e) =>
+          e.countsTowardBudget !== false &&
+          inRange(e.occurredOn, window) &&
+          (budget.scope === "overall" || e.categoryId === budget.categoryId),
       )
     : [];
   const spent = totalIn(relevant, budget.currency, ctx.fx);
@@ -95,6 +98,8 @@ export interface Dashboard {
   range: DateRange;
   currency: CurrencyCode;
   spent: Total;
+  /** Part of `spent` marked as not counting toward budgets. */
+  outsideBudgetMinor: number;
   budget: BudgetProgress | null;
   categories: CategorySlice[];
   recent: Expense[];
@@ -128,6 +133,7 @@ export function buildDashboard(input: {
   const inPeriod = input.expenses.filter((e) => inRange(e.occurredOn, range));
   const currency = overall?.currency ?? input.currency;
   const spent = totalIn(inPeriod, currency, fx);
+  const outsideBudgetMinor = totalIn(inPeriod.filter((e) => e.countsTowardBudget === false), currency, fx).amountMinor;
   const budget = overall ? budgetProgress(overall, input.expenses, { date: today, today, fx }) : null;
 
   const byCategory = new Map<string | null, Expense[]>();
@@ -162,6 +168,7 @@ export function buildDashboard(input: {
     range,
     currency,
     spent,
+    outsideBudgetMinor,
     budget,
     categories,
     recent: sortNewestFirst(input.expenses).slice(0, input.recentLimit ?? 10),

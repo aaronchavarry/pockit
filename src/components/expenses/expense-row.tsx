@@ -32,7 +32,14 @@ export function ExpenseRow({
 
   // Home tiles show only when; rows skip the merchant when it just repeats the title.
   const merchant = variant === "tile" || sameText(expense.merchant, expense.description) ? null : expense.merchant;
-  const meta = [merchant, showDate ? fmt.day(expense.occurredOn) : null, expense.occurredTime].filter(Boolean).join(" · ");
+  const meta = [
+    merchant,
+    showDate ? fmt.day(expense.occurredOn) : null,
+    expense.occurredTime,
+    expense.countsTowardBudget === false ? "Not in budget" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <button
