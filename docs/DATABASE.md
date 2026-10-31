@@ -34,7 +34,7 @@
 | recurrence | `none\|daily\|weekly\|monthly\|yearly` | label only in V1 |
 | source | `manual\|natural_language\|email` | |
 | sourceReference | string \| null | future: email message / transaction id for dedupe |
-| countsTowardBudget | boolean | default true; false = listed and totalled on Home, but not counted against any budget (Supabase: `counts_toward_budget`, migration `20261031120000`) |
+| countsTowardBudget | boolean | default true; false = listed, but left out of Home totals and budget progress (Supabase: `counts_toward_budget`, migration `20261031120000`) |
 | createdAt / updatedAt | ISO timestamp | |
 
 ### Budget

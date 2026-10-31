@@ -46,8 +46,8 @@ export function SpendSummary({ dashboard }: { dashboard: Dashboard }) {
         </p>
       )}
 
-      {budget && outsideBudgetMinor > 0 && (
-        <p className="mt-3 text-xs text-ink-3">{fmt.money(outsideBudgetMinor, currency)} not counted in the budget</p>
+      {outsideBudgetMinor > 0 && (
+        <p className="mt-3 text-xs text-ink-3">+ {fmt.money(outsideBudgetMinor, currency)} outside the budget, not included</p>
       )}
 
       {spent.unconverted.length > 0 && (

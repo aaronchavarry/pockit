@@ -98,7 +98,7 @@ export interface Dashboard {
   range: DateRange;
   currency: CurrencyCode;
   spent: Total;
-  /** Part of `spent` marked as not counting toward budgets. */
+  /** Expenses in the period switched out of the budget. Not part of `spent`. */
   outsideBudgetMinor: number;
   budget: BudgetProgress | null;
   categories: CategorySlice[];
@@ -130,10 +130,12 @@ export function buildDashboard(input: {
   const range =
     (overall && periodWindow(overall, today)) || (period === "week" ? calendarWeek(today) : calendarMonth(today));
 
-  const inPeriod = input.expenses.filter((e) => inRange(e.occurredOn, range));
+  // Expenses switched out of the budget are left out of every Home figure; only a note shows their total.
+  const allInPeriod = input.expenses.filter((e) => inRange(e.occurredOn, range));
+  const inPeriod = allInPeriod.filter((e) => e.countsTowardBudget !== false);
   const currency = overall?.currency ?? input.currency;
   const spent = totalIn(inPeriod, currency, fx);
-  const outsideBudgetMinor = totalIn(inPeriod.filter((e) => e.countsTowardBudget === false), currency, fx).amountMinor;
+  const outsideBudgetMinor = totalIn(allInPeriod.filter((e) => e.countsTowardBudget === false), currency, fx).amountMinor;
   const budget = overall ? budgetProgress(overall, input.expenses, { date: today, today, fx }) : null;
 
   const byCategory = new Map<string | null, Expense[]>();
@@ -172,7 +174,7 @@ export function buildDashboard(input: {
     budget,
     categories,
     recent: sortNewestFirst(input.expenses).slice(0, input.recentLimit ?? 10),
-    expenseCount: inPeriod.length,
+    expenseCount: allInPeriod.length,
   };
 }
 

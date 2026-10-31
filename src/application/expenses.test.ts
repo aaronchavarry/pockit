@@ -111,12 +111,13 @@ describe("expense lifecycle and dashboard", () => {
     expect(buildDashboard({ period: "week", today: TODAY, expenses: [], budgets: [range], categories, currency: "EUR", fx }).budget).toBeNull();
   });
 
-  it("expenses switched out of the budget still count as spent, not against the budget", async () => {
+  it("expenses switched out of the budget are left out of Home figures", async () => {
     const v = validateExpenseInput(form({ amount: "300", countsTowardBudget: false }), categories);
     if (!v.ok) throw new Error("invalid");
     await createExpense(store, v.value, { timezone: "UTC" });
     const d = await dashboard();
-    expect(d.spent.amountMinor).toBe(30000);
+    expect(d.spent.amountMinor).toBe(0);
+    expect(d.categories).toEqual([]);
     expect(d.outsideBudgetMinor).toBe(30000);
     expect(d.budget?.spent.amountMinor).toBe(0);
     expect(d.budget?.remainingMinor).toBe(160000);
