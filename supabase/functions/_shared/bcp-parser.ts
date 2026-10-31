@@ -1,6 +1,6 @@
 /**
  * Deterministic parser for BCP credit-card purchase notifications
- * (subject "BCP Notificaciones", body "Realizaste un consumo de ...").
+ * (from notificaciones@notificacionesbcp.com.pe, body "Realizaste un consumo de ...").
  * Pure TypeScript with no imports: runs in the Edge Function (Deno) and in Vitest.
  * Never guesses: when amount or merchant is missing the email is skipped.
  */
@@ -88,6 +88,8 @@ export function parseBcpPurchase(body: string): ParseResult {
   const inSentence = /Realizaste un consumo de .+? con .+? en (.+?)\.(?:\s|$)/i.exec(text);
   const merchant = (field?.[1] ?? inSentence?.[1] ?? "").trim();
   if (!merchant) return { ok: false, reason: "Merchant not found" };
+  // Card top-ups to the user's own Revolut account move money, they are not spending.
+  if (/^Revolut\b/i.test(merchant)) return { ok: false, reason: "Top-up to own Revolut account (transfer, not spending)" };
 
   let occurredOn: string | null = null;
   let occurredTime: string | null = null;

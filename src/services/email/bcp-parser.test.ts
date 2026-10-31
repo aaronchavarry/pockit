@@ -66,6 +66,11 @@ describe("parseBcpPurchase", () => {
     expect(parseBcpPurchase("Realizaste un consumo de $ 0.00 con tu tarjeta en X.")).toEqual({ ok: false, reason: "Amount not found" });
     expect(parseBcpPurchase("Realizaste un consumo de $ 5.00 con tu tarjeta")).toEqual({ ok: false, reason: "Merchant not found" });
   });
+
+  it("skips top-ups to the user's own Revolut account", () => {
+    const r = parseBcpPurchase("Realizaste un consumo de $ 475.93 con tu Tarjeta de Crédito BCP en Revolut**8969*.  Empresa Revolut**8969*");
+    expect(r).toEqual({ ok: false, reason: "Top-up to own Revolut account (transfer, not spending)" });
+  });
 });
 
 describe("helpers", () => {

@@ -101,9 +101,23 @@
     background: rgb(17 17 19 / 0.28);
     animation: var(--animate-fade-in);
   }
+  html,
+  body {
+    /* Nothing may widen the page sideways on phones. */
+    overflow-x: clip;
+  }
   input[type="date"],
   input[type="time"] {
     min-height: 2.75rem;
+    /* iOS gives native date/time pickers a wide intrinsic size that overflows grids. */
+    min-width: 0;
+    display: block;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="time"]::-webkit-date-and-time-value {
+    text-align: left;
   }
   @media (prefers-reduced-motion: reduce) {
     *,

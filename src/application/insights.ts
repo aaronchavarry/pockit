@@ -104,7 +104,9 @@ export interface Dashboard {
 /**
  * Home figures for the selected period. If an overall budget of the same
  * cadence is in force today, the period follows that budget's window (e.g.
- * a 15th→14th month); otherwise the calendar week/month is used.
+ * a 15th→14th month). On Month, a date-range budget in force today stands in
+ * when there is no monthly one (pay-cycle budgets like Oct 24 → Nov 25).
+ * Otherwise the calendar week/month is used.
  */
 export function buildDashboard(input: {
   period: HomePeriod;
@@ -117,8 +119,9 @@ export function buildDashboard(input: {
   recentLimit?: number;
 }): Dashboard {
   const { period, today, fx } = input;
-  const cadence: BudgetCadence = period;
-  const overall = budgetFor(input.budgets, { cadence, date: today, scope: "overall" });
+  const cadences: BudgetCadence[] = period === "month" ? ["month", "range"] : ["week"];
+  const overall =
+    cadences.map((c) => budgetFor(input.budgets, { cadence: c, date: today, scope: "overall" })).find(Boolean) ?? null;
   const range =
     (overall && periodWindow(overall, today)) || (period === "week" ? calendarWeek(today) : calendarMonth(today));
 
@@ -140,7 +143,7 @@ export function buildDashboard(input: {
             (b) =>
               b.scope === "category" &&
               b.categoryId === categoryId &&
-              cadenceOf(b.periodType) === cadence &&
+              cadences.includes(cadenceOf(b.periodType)) &&
               budgetStatus(b, today) === "active",
           )
         : undefined;
@@ -161,7 +164,7 @@ export function buildDashboard(input: {
     spent,
     budget,
     categories,
-    recent: sortNewestFirst(input.expenses).slice(0, input.recentLimit ?? 4),
+    recent: sortNewestFirst(input.expenses).slice(0, input.recentLimit ?? 10),
     expenseCount: inPeriod.length,
   };
 }

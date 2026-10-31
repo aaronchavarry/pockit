@@ -12,3 +12,6 @@ playwright-report/
 .env*
 !.env.example
 .vercel
+
+# Supabase CLI cache
+supabase/.temp/

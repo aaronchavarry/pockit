@@ -6,6 +6,10 @@
 - Edge Functions `gmail-connect`, `gmail-oauth-callback`, `gmail-sync`; migration `20261031000000_gmail_connections.sql`.
 - Tests: BCP parser (plain text, HTML, soles, thousands, AM/PM, fallbacks, skips) and import rules (categorization, Lima time).
 - Google app stays in "Testing" (publishing needs a verified domain): Gmail must be reconnected every 7 days.
+- Fix: Gmail query filters by sender `from:notificaciones@notificacionesbcp.com.pe`. "BCP Notificaciones" is the sender name, not the subject, so the first sync found nothing.
+- Card top-ups to the own Revolut account (`Revolut*` merchant) are skipped as transfers, not spending. October data: 3 top-ups removed, Revolut transfers added (rent → Bills, people → new "Transfers" category); new categories "Travel" and "Admin & fees"; default currency USD.
+- Home Month falls back to an overall date-range budget in force today when no monthly budget exists. Account data: two USD 1,200 date-range budgets (Oct 24 – Nov 25, Nov 26 – Dec 24).
+- Mobile: inputs use 16px text on phones (stops iOS zoom on focus, which left the page zoomed and scrolling sideways after closing the expense sheet); date/time inputs can shrink inside grids; page clips horizontal overflow. Home Recent shows 10 expenses, tiles show only date and time, and rows hide a merchant that repeats the title.
 
 ## 2026-10-30 — Hosting
 

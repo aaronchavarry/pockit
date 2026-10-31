@@ -7,7 +7,7 @@ import { GoogleAuthError, gmailGet, messageBody, refreshAccessToken, type GmailM
 import { adminClient, corsHeaders, json, requestUserId } from "../_shared/http.ts";
 import { categorizeMerchant, localDateTime, type CategoryHint } from "../_shared/import-rules.ts";
 
-const QUERY = 'subject:"BCP Notificaciones"';
+const QUERY = "from:notificaciones@notificacionesbcp.com.pe";
 const TIME_ZONE = "America/Lima"; // BCP prints Peru local time
 const MAX_MESSAGES = 150; // per user per run; the rest is picked up next run
 

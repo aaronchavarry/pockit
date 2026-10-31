@@ -98,6 +98,18 @@ describe("expense lifecycle and dashboard", () => {
     expect(sum).toBe(month.spent.amountMinor);
   });
 
+  it("Month follows a date-range budget when there is no monthly one", () => {
+    const range = {
+      id: "bud-cycle", name: "Pay cycle", amountMinor: 120000, currency: "USD", scope: "overall" as const, categoryId: null,
+      periodType: "fixed_range" as const, startDate: "2026-10-24", endDate: "2026-11-25", anchorDay: null,
+      effectiveFrom: "2026-10-24", closedOn: null, supersedesBudgetId: null, createdAt: "", updatedAt: "",
+    };
+    const d = buildDashboard({ period: "month", today: TODAY, expenses: [], budgets: [range], categories, currency: "EUR", fx });
+    expect(d.range).toEqual({ start: "2026-10-24", end: "2026-11-25" });
+    expect(d.budget?.budget.id).toBe("bud-cycle");
+    expect(buildDashboard({ period: "week", today: TODAY, expenses: [], budgets: [range], categories, currency: "EUR", fx }).budget).toBeNull();
+  });
+
   it("shows no budget (instead of wrong values) when none applies", async () => {
     const empty = createMemoryStore();
     const d = buildDashboard({ period: "week", today: TODAY, expenses: [], budgets: [], categories, currency: "EUR", fx });

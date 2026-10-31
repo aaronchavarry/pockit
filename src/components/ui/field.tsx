@@ -1,7 +1,7 @@
 import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
 export const controlClass =
-  "w-full min-h-11 rounded-[var(--radius-field)] border border-transparent bg-muted px-3.5 text-[0.95rem] text-ink placeholder:text-ink-3 transition-colors hover:border-line-strong focus:border-ink-3 focus:bg-surface focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ink aria-invalid:border-danger disabled:opacity-60";
+  "w-full min-h-11 rounded-[var(--radius-field)] border border-transparent bg-muted px-3.5 text-base text-ink sm:text-[0.95rem] placeholder:text-ink-3 transition-colors hover:border-line-strong focus:border-ink-3 focus:bg-surface focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ink aria-invalid:border-danger disabled:opacity-60";
 
 interface FieldProps {
   label: string;
@@ -17,7 +17,7 @@ export function Field({ label, error, hint, optional, className = "", children }
   const id = useId();
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <label htmlFor={id} className="text-sm font-medium text-ink-2">
         {label}
         {optional && <span className="font-normal text-ink-3"> · optional</span>}

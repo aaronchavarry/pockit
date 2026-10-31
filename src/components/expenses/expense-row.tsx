@@ -8,6 +8,11 @@ import { useFormat } from "@/state/use-format";
 import { categoryIcon } from "./category-label";
 import { useExpenseEditor } from "./expense-editor";
 
+const plain = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+function sameText(a: string | null, b: string): boolean {
+  return a !== null && plain(a) === plain(b);
+}
+
 /** One expense; opens the editor on click. "tile" matches the Home reference's grey rows. */
 export function ExpenseRow({
   expense,
@@ -25,7 +30,9 @@ export function ExpenseRow({
   const foreign = expense.currency !== preferences.defaultCurrency;
   const converted = foreign ? currencyService.convert(expense.amountMinor, expense.currency, preferences.defaultCurrency) : null;
 
-  const meta = [expense.merchant, showDate ? fmt.day(expense.occurredOn) : null, expense.occurredTime].filter(Boolean).join(" · ");
+  // Home tiles show only when; rows skip the merchant when it just repeats the title.
+  const merchant = variant === "tile" || sameText(expense.merchant, expense.description) ? null : expense.merchant;
+  const meta = [merchant, showDate ? fmt.day(expense.occurredOn) : null, expense.occurredTime].filter(Boolean).join(" · ");
 
   return (
     <button
